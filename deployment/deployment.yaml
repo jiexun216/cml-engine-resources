@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cml-engine-resources-deployment
+  labels:
+    app: cml-engine-resources
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cml-engine-resources
+  template:
+    metadata:
+      labels:
+        app: cml-engine-resources
+    spec:
+      serviceAccount: cml-engine-resources-sa
+      containers:
+        - name: cml-engine-resources
+          image: daocloud.io/daocloud/cml-engine-resources:latest
+          imagePullPolicy: Always
+          args:
+            - -tlsCertFile=/etc/webhook/certs/cert.pem
+            - -tlsKeyFile=/etc/webhook/certs/key.pem
+            - -alsologtostderr
+            - -v=4
+            - 2>&1
+          volumeMounts:
+            - name: webhook-certs
+              mountPath: /etc/webhook/certs
+              readOnly: true
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: cml-engine-resources-certs
