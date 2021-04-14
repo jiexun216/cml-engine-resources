@@ -24,12 +24,10 @@ import (
 
 //only the # cml-user//ds-parent-namespace//
 // cml-engine-resources admission is to add resource limit
-func createAddResourcesContextPatch(pod corev1.Pod, availableAnnotations map[string]string, annotations map[string]string, availableLabels map[string]string, labels map[string]string) ([]byte, error) {
+func createAddResourcesContextPatch(pod corev1.Pod, availableAnnotations map[string]string, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 	// update Annotation to set admissionWebhookAnnotationStatusKey: "mutated"
 	patch = append(patch, updateAnnotation(availableAnnotations, annotations)...)
-	// add labels
-	patch = append(patch, updateLabels(availableLabels, labels)...)
 
 	// update pod container resource
 	replaceResourse := patchOperation{
@@ -65,21 +63,6 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 			})
 		}
 	}
-	return patch
-}
-
-func updateLabels(target map[string]string, added map[string]string) (patch []patchOperation) {
-	values := make(map[string]string)
-	for key, value := range added {
-		if target == nil || target[key] == "" {
-			values[key] = value
-		}
-	}
-	patch = append(patch, patchOperation{
-		Op:    "add",
-		Path:  "/metadata/labels",
-		Value: values,
-	})
 	return patch
 }
 
